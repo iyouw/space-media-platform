@@ -5,7 +5,7 @@ export class Frame<T = unknown> {
   public pts: number;
   public data: Array<T>;
 
-  public constructor (pts: number = 0, data: Array<T> = new Array<T>()) {
+  public constructor(pts = 0, data: Array<T> = new Array<T>()) {
     this.pts = pts;
     this.data = data;
   }

@@ -12,6 +12,8 @@
     "jsx": "preserve"
   },
   "include": [
-    "space-media/**/*"
+    "space-media/**/*",
+    "space-player/**/*",
+    "space-stream-service/**/*"
   ]
 }
