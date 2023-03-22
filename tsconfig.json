@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2015",
+    "module": "ESNext",
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "removeComments": true,
+    "lib": ["ESNext","DOM"],
+    "jsx": "preserve"
+  }
+}

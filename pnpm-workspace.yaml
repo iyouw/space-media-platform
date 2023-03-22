@@ -1,0 +1,5 @@
+packages:
+  - space-media
+  - space-player
+  - space-stream-service
+  - tests/*

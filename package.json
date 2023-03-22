@@ -1,0 +1,19 @@
+{
+  "private": "true",
+  "packageManager": "pnpm@7.18.2",
+  "name": "space-media-platform",
+  "description": "a media player in the deep space to serve visual for all things",
+  "scripts": {
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "iwander",
+  "devDependencies": {
+    "@commitlint/cli": "^17.4.4",
+    "@commitlint/config-conventional": "^17.4.4",
+    "eslint": "^8.36.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.0",
+    "typescript": "^5.0.2"
+  }
+}
