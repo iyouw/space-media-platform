@@ -10,5 +10,8 @@
     "removeComments": true,
     "lib": ["ESNext","DOM"],
     "jsx": "preserve"
-  }
+  },
+  "include": [
+    "space-media/**/*"
+  ]
 }

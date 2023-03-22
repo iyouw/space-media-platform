@@ -5,15 +5,19 @@
   "description": "a media player in the deep space to serve visual for all things",
   "scripts": {
     "prepare": "husky install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint --fix"
   },
   "author": "iwander",
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
     "@commitlint/config-conventional": "^17.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
     "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.0",
+    "prettier": "^2.8.6",
     "typescript": "^5.0.2"
   }
 }
