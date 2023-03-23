@@ -1,6 +1,8 @@
-import { BitReader } from "../utils/reader/bit-reader";
-import { Packet } from "./packet/packet";
+import { Handler } from 'src/utils/typings';
+import { Packet } from './packet/packet';
 
 export interface IDemuxer {
-  parsePacket(reader: BitReader): Packet;
+  onHeaderParsed?: Handler<void>;
+  onPacketParsed?: Handler<Packet>;
+  demux(): void;
 }
