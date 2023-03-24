@@ -47,6 +47,10 @@ export class MemoryStream implements IStream {
     return this._buffer[index];
   }
 
+  public has(count: number): boolean {
+    return this._position + count <= this._length;
+  }
+
   public write(data: ByteArrayLike | Array<ByteArrayLike>): void {
     const buffers = Array.isArray(data) ? data : [data];
     const length = buffers.reduce((ret, buffer) => (ret += buffer.byteLength), 0);

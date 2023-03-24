@@ -30,6 +30,7 @@ export class TranscodeContext {
   public constructor(url: string, nodeFactory = NodeFactory.Default) {
     this._url = url;
     this._nodeFactory = nodeFactory;
+
     this._mediaSourceNode = this.createMediaSourceNode();
     this._mediaDemuxNode = this.createMediaDemuxNode();
     this._videoDecodeNode = this.createVideoDecodeNode();
@@ -38,10 +39,12 @@ export class TranscodeContext {
     this._audioActionNode = this.createAudioActonNode();
 
     this._mediaSourceNode.connect(this._mediaDemuxNode);
+
     this._mediaDemuxNode.connect(this._videoDecodeNode, MediaType.VIDEO);
     this._mediaDemuxNode.connect(this._audioDecodeNode, MediaType.AUDIO);
-    this._videoActionNode.connect(this._videoActionNode);
-    this._audioActionNode.connect(this._audioActionNode);
+
+    this._videoDecodeNode.connect(this._videoActionNode);
+    this._audioDecodeNode.connect(this._audioActionNode);
   }
 
   public dispose(): void {

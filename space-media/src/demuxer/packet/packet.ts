@@ -22,4 +22,8 @@ export class Packet {
   public get codeId(): CodecId {
     return this.stream.codeId;
   }
+
+  public addData(data: Uint8Array): void {
+    this.data.push(data);
+  }
 }

@@ -3,12 +3,20 @@ import { MediaType } from '../media-type';
 import { StreamType } from './stream-type';
 
 export class Stream {
-  public id: number;
-  public type: StreamType;
+  public _id: number;
+  public _type: StreamType;
 
-  public constructor(id = 0, type: StreamType = StreamType.UNKNOW) {
-    this.id = id;
-    this.type = type;
+  public constructor(id = 0, type: StreamType) {
+    this._id = id;
+    this._type = type;
+  }
+
+  public get id(): number {
+    return this._id;
+  }
+
+  public get type(): StreamType {
+    return this._type;
   }
 
   public get mediaType(): MediaType {

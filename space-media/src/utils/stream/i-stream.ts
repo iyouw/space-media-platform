@@ -4,6 +4,7 @@ export interface IStream {
   readonly position: number;
   readonly length: number;
   get(index: number): number;
+  has(count: number): boolean;
   write(data: ByteArrayLike | Array<ByteArrayLike>): void;
   read(count?: number): Uint8Array;
   skip(count: number): void;

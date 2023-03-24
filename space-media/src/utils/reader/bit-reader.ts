@@ -54,6 +54,15 @@ export class BitReader {
     this._position = position;
   }
 
+  public seek(position: number): void {
+    this.checkPosition(position);
+    this._position = position;
+  }
+
+  public readToEnd(): Uint8Array {
+    return this._data.subarray(this._position);
+  }
+
   public has(count: number): boolean {
     return this._position + count <= this.length;
   }
