@@ -17,7 +17,7 @@ export class Counter {
   }
 
   public get isCompleted(): boolean {
-    return this._current >= this._max;
+    return this._max !== 0 && this._current >= this._max;
   }
 
   public count(count: number): void {

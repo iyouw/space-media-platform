@@ -90,12 +90,11 @@ export class TSDemuxer extends Demuxer {
     reader.skip(12);
     // read section_length(12 bit)
     const sectionLength = reader.read(12);
+    // skip transport_stream_id(16 bit), reserve(2 bit), version (5 bit) current_next_indicator(1 bit)
+    // skip section_number(8 bit), last_section_number(8 bit)
+    reader.skip(40);
     // create pat
     if (!this._pat) this._pat = new PAT(sectionLength);
-    // skip transport_stream_id(16 bit), reserve(2 bit), version (5 bit) current_next_indicator(1 bit)
-    reader.skip(24);
-    // skip section_number(8 bit), last_section_number(8 bit)
-    reader.skip(8 + 8);
     // pat skip the middle & crc bytes
     // skip transport_stream_id(16 bit), reserve(2 bit), version (5 bit) current_next_indicator(1 bit)
     // skip section_number(8 bit), last_section_number(8 bit) crc(32 bit). all is 16 + 2 + 5 + 1 + 8 + 8 + 32 = 9
@@ -109,6 +108,7 @@ export class TSDemuxer extends Demuxer {
       if (!programNumber) {
         // skip network pid
         reader.skip(13);
+        this._pat.count(4);
         continue;
       }
       // read program_pid(13 bit)
@@ -126,20 +126,18 @@ export class TSDemuxer extends Demuxer {
     reader.skip(12);
     // read section_length(12 bit)
     const sectionLength = reader.read(12);
-    // record how many bits had readed
-    if (!this._pmt) this._pmt = new PMT(sectionLength);
-    // read program_number(16 bit)
-    if (reader.read(16) <= 0) return;
+    // skip program_number(16 bit)
     // skip reserve(2 bit), version(5 bit) current_next_indicator(1 bit)
-    reader.skip(8);
     // skip section_number(8bit), last_section_number(8 bit),
     // reserve(3 bit), pcr_pid(13 bit), reserve(4 bit)
-    reader.skip(36);
+    reader.skip(60);
     // read program_info_length(12 bit) and skip
     // skip program_info_length
     const desc = reader.read(12);
     reader.skip(desc << 3);
-    // pmt skip 16 + 7 + 1 + 36 + 12 + 32 = 13 byte
+    // create pmt & skip header length
+    if (!this._pmt) this._pmt = new PMT(sectionLength);
+    // pmt skip 16 + 2 + 5 + 1 + 8 + 8 + 3 + 13 + 4 + 12 + 32 = 13 byte
     this._pmt.count(13 + desc);
     // loop
     while (!reader.isEnd && !this.isPmtCompleted) {
@@ -168,47 +166,66 @@ export class TSDemuxer extends Demuxer {
     if (!stream) return;
     if (payloadStart) {
       const prevPacket = this._packetMap.get(pid);
-      if (prevPacket) this.onPacketParsed?.(prevPacket);
-      // check is start
-      if (reader.read(24) !== 0x01) return;
-      // stream id(8 bit)
-      reader.skip(8);
-      const packetLength = reader.read(16);
-      // reserved(2bit), pes_scrambling_control(2 bit), pes_priority(1 bit)
-      // data_alignment_indicator(1 bit), copyright(1 bit), original_or_copy(1 bit)
-      reader.skip(8);
-      const ptsDtsFlag = reader.read(2);
-      // ESCR_flag(1 bit), RS_rate_flag(1 bit), DSM_trick_mode_flag(1 bit)
-      // additional_copy_info_flag(1 bit), PES_CRC_flag(1 bit), PES_extension_flag(1 bit)
-      reader.skip(6);
-      const headerLength = reader.read(8);
-
-      const payloadStartIndex = reader.index + (headerLength << 3);
-      const payloadLength = packetLength ? packetLength - headerLength - 3 : 0;
-      const pkt = new Packet(stream);
-      if (ptsDtsFlag & 0x02) {
-        // The Presentation Timestamp is encoded as 33(!) bit
-        // integer, but has a "marker bit" inserted at weird places
-        // in between, making the whole thing 5 bytes in size.
-        // You can't make this shit up...
-        reader.skip(4);
-        const p32_30 = reader.read(3);
-        reader.skip(1);
-        const p29_15 = reader.read(15);
-        reader.skip(1);
-        const p14_0 = reader.read(15);
-        reader.skip(1);
-        // Can't use bit shifts here; we need 33 bits of precision,
-        // so we're using JavaScript's double number type. Also
-        // divide by the 90khz clock to get the pts in seconds.
-        const pts = (p32_30 * 1073741824 + p29_15 * 32768 + p14_0) / 90000;
-        pkt.pts = pts;
-        this._packetMap.set(pid, pkt);
+      if (prevPacket) {
+        this.onPacketParsed?.(prevPacket);
+        // delete prev packet
+        this._packetMap.delete(pid);
       }
-      reader.seek(payloadStartIndex);
+      this.createNewPacket(reader, pid);
     }
     const pkt = this._packetMap.get(pid);
     if (!pkt) return;
     pkt.addData(reader.readToEnd());
+  }
+
+  private createNewPacket(reader: BitReader, pid: number): void {
+    const turple = this.readPtsAndPayloadLength(reader);
+    if (!turple.length) return;
+    const [pts, payloadLength] = turple;
+    const stream = this.getSelected(pid);
+    if (!stream) return;
+    const pkt = new Packet(stream, payloadLength, pts);
+    this._packetMap.set(pid, pkt);
+  }
+
+  private readPtsAndPayloadLength(reader: BitReader): Array<number> {
+    const res = new Array<number>();
+    // check is start
+    if (reader.read(24) !== 0x01) return res;
+    // stream id(8 bit)
+    reader.skip(8);
+    const packetLength = reader.read(16);
+    // reserved(2bit), pes_scrambling_control(2 bit), pes_priority(1 bit)
+    // data_alignment_indicator(1 bit), copyright(1 bit), original_or_copy(1 bit)
+    reader.skip(8);
+    const ptsDtsFlag = reader.read(2);
+    // ESCR_flag(1 bit), RS_rate_flag(1 bit), DSM_trick_mode_flag(1 bit)
+    // additional_copy_info_flag(1 bit), PES_CRC_flag(1 bit), PES_extension_flag(1 bit)
+    reader.skip(6);
+    const headerLength = reader.read(8);
+    const payloadStartIndex = reader.index + (headerLength << 3);
+    const payloadLength = packetLength ? packetLength - headerLength - 3 : 0;
+    let pts = 0;
+    if (ptsDtsFlag & 0x02) {
+      // The Presentation Timestamp is encoded as 33(!) bit
+      // integer, but has a "marker bit" inserted at weird places
+      // in between, making the whole thing 5 bytes in size.
+      // You can't make this shit up...
+      reader.skip(4);
+      const p32_30 = reader.read(3);
+      reader.skip(1);
+      const p29_15 = reader.read(15);
+      reader.skip(1);
+      const p14_0 = reader.read(15);
+      reader.skip(1);
+      // Can't use bit shifts here; we need 33 bits of precision,
+      // so we're using JavaScript's double number type. Also
+      // divide by the 90khz clock to get the pts in seconds.
+      pts = (p32_30 * 1073741824 + p29_15 * 32768 + p14_0) / 90000;
+    }
+    reader.seek(payloadStartIndex);
+    res.push(pts);
+    res.push(payloadLength);
+    return res;
   }
 }

@@ -1,17 +1,17 @@
 import { CodecId } from 'src/decoder/codec-id';
+import { Counter } from 'src/utils/counter/counter';
 import { MediaType } from '../media-type';
 import { Stream } from '../stream/stream';
 
-export class Packet {
+export class Packet extends Counter {
   public readonly stream: Stream;
   public pts: number;
-  public length: number;
   public data: Array<Uint8Array>;
 
-  public constructor(stream: Stream, pts = 0, length = 0, data: Array<Uint8Array> = new Array<Uint8Array>()) {
+  public constructor(stream: Stream, length = 0, pts = 0, data: Array<Uint8Array> = new Array<Uint8Array>()) {
+    super(length);
     this.stream = stream;
     this.pts = pts;
-    this.length = length;
     this.data = data;
   }
 
@@ -25,5 +25,6 @@ export class Packet {
 
   public addData(data: Uint8Array): void {
     this.data.push(data);
+    this.count(data.length);
   }
 }
