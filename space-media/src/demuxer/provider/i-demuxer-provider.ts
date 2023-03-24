@@ -1,7 +1,9 @@
-import { MediaSource } from 'src/media-source/media-source';
+import { IMediaSource } from 'src/media-source/i-media-source';
+import { IDemuxer } from '../i-demuxer';
 import { ProbeResult } from './probe-result';
 
 export interface IDemuxerProvider {
   canDemux(format: number): boolean;
-  probe(source: MediaSource): ProbeResult;
+  probe(source: IMediaSource): ProbeResult;
+  provider(): IDemuxer;
 }

@@ -1,8 +1,9 @@
 import { Registry } from 'src/utils/registry/registry';
 import { IMediaLoaderProvider } from '../provider/i-media-loader-provider';
 import { WebsocketMediaLoaderProvider } from '../provider/websocket-media-loader-provider';
+import { IMediaLoaderRegistry } from './i-media-loader-registry';
 
-export class MediaLoaderRegistry extends Registry<IMediaLoaderProvider> {
+export class MediaLoaderRegistry extends Registry<IMediaLoaderProvider> implements IMediaLoaderRegistry {
   public static readonly Default = MediaLoaderRegistry.CreateDefault();
 
   public static CreateDefault(): MediaLoaderRegistry {

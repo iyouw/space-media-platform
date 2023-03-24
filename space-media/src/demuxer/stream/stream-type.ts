@@ -1,3 +1,3 @@
-export const enum MediaStreamType {
+export const enum StreamType {
   UNKNOW,
 }

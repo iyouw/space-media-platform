@@ -3,4 +3,5 @@ import { Frame } from './frame/frame';
 
 export interface IDecoder {
   decode(packet: Packet): Frame;
+  dispose(): void;
 }

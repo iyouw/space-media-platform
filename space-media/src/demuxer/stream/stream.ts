@@ -1,10 +1,10 @@
-import { MediaStreamType } from './stream-type';
+import { StreamType } from './stream-type';
 
-export class MediaStream {
+export class Stream {
   public id: number;
-  public type: MediaStreamType;
+  public type: StreamType;
 
-  public constructor(id = 0, type: MediaStreamType = MediaStreamType.UNKNOW) {
+  public constructor(id = 0, type: StreamType = StreamType.UNKNOW) {
     this.id = id;
     this.type = type;
   }

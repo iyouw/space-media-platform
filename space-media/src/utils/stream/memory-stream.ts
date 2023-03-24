@@ -1,7 +1,8 @@
 import { OutOfRangeException } from '../exception/out-of-range-exception';
 import { ByteArrayLike, Handler } from '../typings';
+import { IStream } from './i-stream';
 
-export class MemoryStream {
+export class MemoryStream implements IStream {
   public static readonly Page = 64 * 1024;
 
   private _buffer: Uint8Array;
@@ -42,6 +43,7 @@ export class MemoryStream {
   }
 
   public get(index: number): number {
+    this.checkPosition(index);
     return this._buffer[index];
   }
 
@@ -80,6 +82,10 @@ export class MemoryStream {
   public seek(position: number): void {
     this.checkPosition(position);
     this._position = position;
+  }
+
+  public dispose(): void {
+    this._buffer = new Uint8Array();
   }
 
   private checkPosition(position: number): void {

@@ -7,6 +7,10 @@ export class Registry<T> {
     this._items = new Array<T>();
   }
 
+  protected get items(): Array<T> {
+    return this._items;
+  }
+
   public register(item: T): void {
     this._items.push(item);
   }
