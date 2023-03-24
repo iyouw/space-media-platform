@@ -2,10 +2,10 @@ import { IDecoder } from 'src/decoder/i-decoder';
 import { DecoderRegistry } from 'src/decoder/registry/decoder-registry';
 import { IDecoderRegistry } from 'src/decoder/registry/i-decoder-registry';
 import { Packet } from 'src/demuxer/packet/packet';
-import { NotImplementException } from 'src/utils/exception/not-implement-exception';
-import { SimpleNode } from '../simple-node';
+import { NotFoundException } from 'src/utils/exception/not-found-exception';
+import { Node } from '../node';
 
-export class MediaDecodeNode extends SimpleNode<Packet> {
+export class MediaDecodeNode extends Node<Packet> {
   private _decoderRegistry: IDecoderRegistry;
   private _decoder?: IDecoder;
 
@@ -15,7 +15,14 @@ export class MediaDecodeNode extends SimpleNode<Packet> {
   }
 
   public process(data: Packet): void {
-    throw new NotImplementException();
+    if (!this._decoder) {
+      const provider = this._decoderRegistry.getProvider(data.codeId);
+      if (!provider) throw new NotFoundException(`decoder for ${data.codeId}`);
+      this._decoder = provider.provide();
+    }
+    const frame = this._decoder.decode(data);
+    const node = this.getConnectNode();
+    node?.process(frame);
   }
 
   public dispose(): void {

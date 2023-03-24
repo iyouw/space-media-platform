@@ -16,13 +16,13 @@ export class DemuxerRegistry extends Registry<IDemuxerProvider> implements IDemu
   public probe(source: IMediaSource): ProbeResult {
     let res: ProbeResult = { status: ProbeStatus.FAILURE };
     for (const provider of this.items) {
-      const pr = provider.probe(source);
-      if (pr.status === ProbeStatus.SUCCESS) {
-        res = pr;
+      const probeResult = provider.probe(source);
+      if (probeResult.status === ProbeStatus.SUCCESS) {
+        res = probeResult;
         break;
       }
-      if (pr.status === ProbeStatus.NEEDDATA) {
-        res = pr;
+      if (probeResult.status === ProbeStatus.NEEDDATA) {
+        res = probeResult;
       }
     }
     return res;

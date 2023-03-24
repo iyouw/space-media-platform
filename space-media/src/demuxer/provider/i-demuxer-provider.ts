@@ -5,5 +5,5 @@ import { ProbeResult } from './probe-result';
 export interface IDemuxerProvider {
   canDemux(format: number): boolean;
   probe(source: IMediaSource): ProbeResult;
-  provider(): IDemuxer;
+  provide(): IDemuxer;
 }

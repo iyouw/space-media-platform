@@ -3,21 +3,30 @@ import { IMediaLoaderRegistry } from 'src/media-loader/registry/i-media-loader-r
 import { MediaLoaderRegistry } from 'src/media-loader/registry/media-loader-registry';
 import { IMediaSource } from 'src/media-source/i-media-source';
 import { MediaSource } from 'src/media-source/media-source';
+import { NotFoundException } from 'src/utils/exception/not-found-exception';
 import { NotImplementException } from 'src/utils/exception/not-implement-exception';
-import { SimpleNode } from '../simple-node';
+import { Node } from '../node';
 
-export class MediaSourceNode extends SimpleNode {
+export class MediaSourceNode extends Node {
   private _mediaLoaderRegistry: IMediaLoaderRegistry;
 
   private _mediaLoader?: IMediaLoader;
   private _mediaSource?: IMediaSource;
 
-  public constructor(mediaLoaderRegistry = MediaLoaderRegistry.Default) {
+  public constructor(url: string, mediaSource?: IMediaSource, mediaLoaderRegistry = MediaLoaderRegistry.Default) {
     super();
     this._mediaLoaderRegistry = mediaLoaderRegistry;
+    this._mediaSource = mediaSource ?? new MediaSource(url);
+    this._mediaLoader = this.createMediaLoader(url);
+
+    this._mediaLoader.onDataArrived = (data: ArrayBuffer) => {
+      this._mediaSource?.write(data);
+      const node = this.getConnectNode();
+      node?.process(this._mediaSource);
+    };
   }
 
-  public override process(data: unknown): void {
+  public override process(): void {
     throw new NotImplementException();
   }
 
@@ -26,5 +35,11 @@ export class MediaSourceNode extends SimpleNode {
     this._mediaSource?.dispose();
     this._mediaLoader = undefined;
     this._mediaSource = undefined;
+  }
+
+  protected createMediaLoader(url: string): IMediaLoader {
+    const provider = this._mediaLoaderRegistry.getProvider(url);
+    if (!provider) throw new NotFoundException(`loader for ${url}`);
+    return provider.provide(url);
   }
 }

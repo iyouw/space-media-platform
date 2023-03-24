@@ -1,12 +1,16 @@
 import { IDemuxer } from 'src/demuxer/i-demuxer';
+import { MediaType } from 'src/demuxer/media-type';
+import { Packet } from 'src/demuxer/packet/packet';
+import { ProbeStatus } from 'src/demuxer/provider/probe-status';
 import { DemuxerRegistry } from 'src/demuxer/registry/demuxer-registry';
 import { IDemuxerRegistry } from 'src/demuxer/registry/i-demuxer-registry';
-import { MediaSource } from 'src/media-source/media-source';
-import { NotImplementException } from 'src/utils/exception/not-implement-exception';
-import { MapNode } from '../map-node';
+import { IMediaSource } from 'src/media-source/i-media-source';
+import { NotFoundException } from 'src/utils/exception/not-found-exception';
+import { Node } from '../node';
 
-export class MediaDemuxNode extends MapNode<MediaSource> {
+export class MediaDemuxNode extends Node<IMediaSource> {
   private _demuxerRegistry: IDemuxerRegistry;
+
   private _demuxer?: IDemuxer;
 
   public constructor(demuxerRegistry = DemuxerRegistry.Default) {
@@ -14,11 +18,39 @@ export class MediaDemuxNode extends MapNode<MediaSource> {
     this._demuxerRegistry = demuxerRegistry;
   }
 
-  public process(data: MediaSource): void {
-    throw new NotImplementException();
+  public process(data: IMediaSource): void {
+    if (!this._demuxer) {
+      const probeResult = this._demuxerRegistry.probe(data);
+      if (probeResult.status === ProbeStatus.FAILURE) throw new NotFoundException(`demuxer for media ${data.url}`);
+      if (probeResult.status === ProbeStatus.NEEDDATA) return;
+      if (probeResult.status === ProbeStatus.SUCCESS) {
+        this._demuxer = probeResult.provider.provide();
+        this._demuxer.onHeaderParsed = this.selectMediaStream.bind(this);
+        this._demuxer.onPacketParsed = this.decodePacket.bind(this);
+      }
+    }
+    this._demuxer?.demux(data);
   }
 
   public dispose(): void {
     this._demuxer?.dispose();
+    this._demuxer = undefined;
+  }
+
+  protected selectMediaStream(): void {
+    if (!this._demuxer) return;
+    const videos = this._demuxer.getStreams(MediaType.VIDEO);
+    const audios = this._demuxer.getStreams(MediaType.AUDIO);
+    const selectedVideo = videos[0];
+    const selectedAudio = audios[0];
+    this._demuxer.select(selectedVideo);
+    this._demuxer.select(selectedAudio);
+  }
+
+  protected decodePacket(packet: Packet): void {
+    if (!this._demuxer) return;
+    const type = packet.mediaType;
+    const node = this.getConnectNode(type);
+    node?.process(packet);
   }
 }

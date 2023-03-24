@@ -9,7 +9,7 @@ export class WebsocketMediaLoaderProvider implements IMediaLoaderProvider {
     return WebsocketMediaLoaderProvider.REGEXP.test(url);
   }
 
-  public provide(url: string, option?: Record<string, unknown>): IMediaLoader {
+  public provide(url: string): IMediaLoader {
     return new WebsocketMediaLoader(url);
   }
 }
