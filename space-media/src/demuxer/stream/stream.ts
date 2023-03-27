@@ -3,8 +3,8 @@ import { MediaType } from '../media-type';
 import { StreamType } from './stream-type';
 
 export class Stream {
-  public _id: number;
-  public _type: StreamType;
+  private _id: number;
+  private _type: StreamType;
 
   public constructor(id = 0, type: StreamType) {
     this._id = id;

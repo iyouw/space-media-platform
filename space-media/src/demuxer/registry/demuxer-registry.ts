@@ -3,6 +3,7 @@ import { Registry } from 'src/utils/registry/registry';
 import { IDemuxerProvider } from '../provider/i-demuxer-provider';
 import { ProbeResult } from '../provider/probe-result';
 import { ProbeStatus } from '../provider/probe-status';
+import { TSDemuxerProvider } from '../provider/ts-demuxer-provider';
 import { IDemuxerRegistry } from './i-demuxer-registry';
 
 export class DemuxerRegistry extends Registry<IDemuxerProvider> implements IDemuxerRegistry {
@@ -10,6 +11,7 @@ export class DemuxerRegistry extends Registry<IDemuxerProvider> implements IDemu
 
   public static CreateDefault(): DemuxerRegistry {
     const res = new DemuxerRegistry();
+    res.register(new TSDemuxerProvider());
     return res;
   }
 

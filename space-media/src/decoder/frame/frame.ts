@@ -1,9 +1,9 @@
-import type { AudioFrame } from "./audio-frame";
-import type { VideoFrame } from "./video-frame";
+import type { AudioFrame } from './audio-frame';
+import type { VideoFrame } from './video-frame';
 
 export class Frame<T = unknown> {
   public pts: number;
-  public data: Array<T>;
+  public readonly data: Array<T>;
 
   public constructor(pts = 0, data: Array<T> = new Array<T>()) {
     this.pts = pts;
@@ -16,5 +16,9 @@ export class Frame<T = unknown> {
 
   public isAudio(): this is AudioFrame {
     return false;
+  }
+
+  public add(data: T): void {
+    this.data.push(data);
   }
 }

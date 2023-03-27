@@ -1,4 +1,6 @@
-export class Counter {
+import { ICountable } from './i-countable';
+
+export class Counter implements ICountable {
   private _max: number;
 
   private _current: number;

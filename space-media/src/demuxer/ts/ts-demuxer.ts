@@ -115,7 +115,7 @@ export class TSDemuxer extends Demuxer {
       const pid = reader.read(13);
       const program = new Program(pid, programNumber);
       // 16 bit + 3 bit + 13 bit = 4 byte. so the program size is 4
-      this._pat.addProgram(program, 4);
+      this._pat.add(program.id, program, 4);
     }
   }
 
@@ -149,7 +149,7 @@ export class TSDemuxer extends Demuxer {
       const pid = reader.read(13);
       const stream = new Stream(pid, streamType);
       // stream_type 8 bit reserve 3 bit elementary_pid 13bit. total is 8 bit + 3 bit + 13 bit = 3 bytes
-      this._pmt.addStream(stream, 3);
+      this._pmt.add(stream.id, stream, 3);
 
       // skip reserve(4 bit)
       reader.skip(4);

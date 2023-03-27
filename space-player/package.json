@@ -10,6 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "space-media":"workspace: *"
+    "space-media": "workspace: *"
+  },
+  "devDependencies": {
+    "esbuild": "^0.17.14"
   }
 }

@@ -94,6 +94,14 @@ export class BitReader {
     return res;
   }
 
+  public readByteAfterBlock(block: Array<number>): number {
+    let res = 0;
+    if (this.moveToBlock(block)) {
+      res = this._data[this.index++];
+    }
+    return res;
+  }
+
   private checkPosition(position: number): void {
     if (position < 0 || position > this.length) throw new OutOfRangeException(0, this.length, position);
   }

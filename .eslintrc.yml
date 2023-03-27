@@ -7,4 +7,5 @@ parser: "@typescript-eslint/parser"
 plugins:
   - "@typescript-eslint"
 rules:
+  "no-constant-condition": "warn"
   "@typescript-eslint/no-empty-function": "warn"

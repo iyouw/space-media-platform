@@ -1,22 +1,10 @@
-import { Counter } from 'src/utils/counter/counter';
+import { CountableMap } from 'src/utils/map/countable-map';
 import { MediaType } from '../media-type';
 import { Stream } from '../stream/stream';
 
-export class PMT extends Counter {
-  private _streamMap: Map<number, Stream>;
-
-  public constructor(size: number) {
-    super(size);
-    this._streamMap = new Map<number, Stream>();
-  }
-
-  public addStream(stream: Stream, size: number): void {
-    this._streamMap.set(stream.id, stream);
-    this.count(size);
-  }
-
+export class PMT extends CountableMap<number, Stream> {
   public getStreams(type?: MediaType | undefined): Array<Stream> {
-    const streams = Array.from(this._streamMap.values());
+    const streams = this.values();
     if (!type) return streams;
     return streams.filter((x) => x.mediaType === type);
   }
