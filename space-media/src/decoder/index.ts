@@ -4,9 +4,13 @@ export * from './frame/video-frame';
 
 export * from './mpeg1/constant';
 export * from './mpeg1/mpeg1-decoder';
+export * from './mpeg1/mpeg1-decoder-provider';
+
+export * from './mp2/constants';
+export * from './mp2/mp2-decoder';
+export * from './mp2/mp2-decoder-provider';
 
 export * from './provider/i-decoder-provider';
-export * from './provider/mpeg1-decoder-provider';
 
 export * from './registry/decoder-registry';
 export * from './registry/i-decoder-registry';

@@ -6,6 +6,7 @@
   "scripts": {
     "prepare": "husky install",
     "startup": "pnpm --filter space-media build && pnpm --filter space-player build",
+    "serve":"pnpm --filter space-stream-service start",
     "test:player":"pnpm --filter player-test dev",
     "lint": "eslint --fix",
     "clean": "rimraf **/node_modules && rimraf **/dist"

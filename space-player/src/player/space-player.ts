@@ -1,11 +1,14 @@
 import { AudioFrame, TranscodeContext, VideoFrame } from 'space-media';
 import { GLRenderer } from 'src/renderer/gl-renderer/gl-renderer';
 import { IRenderer } from 'src/renderer/i-renderer';
+import { WebAudioSounder } from 'src/sounder';
+import { ISounder } from 'src/sounder/i-sounder';
 import { IPlayer } from './i-player';
 
 export class SpacePlayer implements IPlayer {
   private _context?: TranscodeContext;
 
+  private _sounder: ISounder;
   private _renderer: IRenderer;
 
   private _videoFrames: Array<VideoFrame>;
@@ -16,6 +19,7 @@ export class SpacePlayer implements IPlayer {
   private _animationId: number;
 
   public constructor() {
+    this._sounder = new WebAudioSounder();
     this._renderer = new GLRenderer();
     this._videoFrames = new Array<VideoFrame>();
     this._audioFrams = new Array<AudioFrame>();
@@ -64,15 +68,20 @@ export class SpacePlayer implements IPlayer {
   }
 
   private updateForStreaming(): void {
-    const frame = this._videoFrames.shift();
-    if (!frame) return;
-    const buffers = frame.data;
+    const video = this._videoFrames.shift();
+    if (!video) return;
+    const videoData = video.data;
     this._renderer.render(
-      buffers[0] as Uint8ClampedArray,
-      buffers[1] as Uint8ClampedArray,
-      buffers[2] as Uint8ClampedArray,
-      frame.width,
-      frame.height
+      videoData[0] as Uint8ClampedArray,
+      videoData[1] as Uint8ClampedArray,
+      videoData[2] as Uint8ClampedArray,
+      video.width,
+      video.height
     );
+
+    const audio = this._audioFrams.shift();
+    if (!audio) return;
+    const audioData = audio.data;
+    this._sounder.sound(audioData[0], audioData[1], audio.sampleRate);
   }
 }

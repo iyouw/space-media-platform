@@ -1,7 +1,7 @@
 import { CodecId } from '../codec-id';
 import { IDecoder } from '../i-decoder';
-import { Mpeg1Decoder } from '../mpeg1/mpeg1-decoder';
-import { IDecoderProvider } from './i-decoder-provider';
+import { Mpeg1Decoder } from './mpeg1-decoder';
+import { IDecoderProvider } from '../provider/i-decoder-provider';
 
 export class Mpeg1DecoderProvider implements IDecoderProvider {
   public canDecode(codecId: CodecId): boolean {
