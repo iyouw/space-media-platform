@@ -1,10 +1,9 @@
-import { IMediaSource } from 'src/media-source/i-media-source';
-import { Handler } from 'src/utils/typings';
+import { IMediaSource } from '../media-source/i-media-source';
+import { Handler } from '../utils/typings';
 import { IDemuxer } from './i-demuxer';
 import { MediaType } from './media-type';
 import { Packet } from './packet/packet';
 import { Stream } from './stream/stream';
-import { StreamType } from './stream/stream-type';
 
 export abstract class Demuxer implements IDemuxer {
   private _selectedStreams: Map<number, Stream>;
@@ -28,7 +27,8 @@ export abstract class Demuxer implements IDemuxer {
     return this._selectedStreams.get(streamId);
   }
 
-  public select(stream: Stream): void {
+  public select(stream: Stream | undefined): void {
+    if (!stream) return;
     this._selectedStreams.set(stream.id, stream);
   }
 

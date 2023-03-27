@@ -1,5 +1,5 @@
-import { BitReader } from 'src/utils/reader/bit-reader';
-import { BlockHelper } from 'src/utils/reader/block-helper';
+import { BitReader } from '../../utils/reader/bit-reader';
+import { BlockHelper } from '../../utils/reader/block-helper';
 import { Packet } from '../../demuxer/packet/packet';
 import { Decoder } from '../docoder';
 import { Frame } from '../frame/frame';
@@ -98,20 +98,20 @@ export class Mpeg1Decoder extends Decoder {
   private _dcPredictorCr = 0;
   private _dcPredictorCb = 0;
 
-  public override decode(packet: Packet): void {
+  public decode(packet: Packet): void {
     const start = self.performance.now();
     const frame = new VideoFrame(this._width, this._height, packet.pts);
     const reader = new BitReader(packet.data);
     if (!this.decodeSequenceLayer(reader, frame)) return;
     if (!this.decodePicture(reader, frame)) return;
     const duration = self.performance.now() - start;
-    console.log(`decode ellapsed: ${duration}`);
+    console.log(Mpeg1Decoder.name, `time elapsed:${duration}`);
   }
 
   // sequence layer
   private decodeSequenceLayer(reader: BitReader, frame: VideoFrame): boolean {
     if (this._hasSequenceHeader) return true;
-    if (!reader.moveToBlock(BlockHelper.StartBlock(START.SEQUENCE))) return false;
+    if (reader.findStartCode(START.SEQUENCE) === -1) return false;
     // get size
     const newWidth = reader.read(12);
     const newHeight = reader.read(12);
@@ -152,7 +152,7 @@ export class Mpeg1Decoder extends Decoder {
   // picture layer
   private decodePicture(reader: BitReader, frame: Frame): boolean {
     if (!this._hasSequenceHeader) return false;
-    if (!reader.moveToBlock(BlockHelper.StartBlock(START.PICTURE))) return false;
+    if (reader.findStartCode(START.PICTURE) === -1) return false;
     // skip temporalReference
     reader.skip(10);
     // read picture type
@@ -173,12 +173,12 @@ export class Mpeg1Decoder extends Decoder {
 
     let code = 0;
     do {
-      code = reader.readByteAfterBlock(BlockHelper.StartBlock());
+      code = reader.findNextStartCode();
     } while (code === START.EXTENSION || code === START.USER_DATA);
 
     while (code >= START.SLICE_FIRST && code <= START.SLICE_LAST) {
       this.decodeSlice(code & 0x000000ff, reader);
-      code = reader.readByteAfterBlock(BlockHelper.StartBlock());
+      code = reader.findNextStartCode();
     }
 
     // We found the next start code; rewind 32bits and let the main loop handle it
@@ -215,7 +215,7 @@ export class Mpeg1Decoder extends Decoder {
 
     do {
       this.decodeMacroblock(reader);
-    } while (!reader.isBlock(BlockHelper.StartBlock()));
+    } while (!reader.isNextBytesAreStartCode());
   }
 
   // macro block layer
@@ -417,7 +417,6 @@ export class Mpeg1Decoder extends Decoder {
 
     // decode ac coefficients (+ dc for non-intra)
     let level = 0;
-    // eslint ignore
     while (true) {
       let run = 0;
       const coeff = this.readHuffman(DCT_COEFF, reader);
@@ -516,10 +515,6 @@ export class Mpeg1Decoder extends Decoder {
   }
 
   // helpers
-  private createPacketReader(packet: Packet): BitReader {
-    return new BitReader(packet.data);
-  }
-
   private initBuffers(): void {
     this._intraQuantMatrix = DEFAULT_INTRA_QUANT_MATRIX;
     this._nonIntraQuantMatrix = DEFAULT_NON_INTRA_QUANT_MATRIX;
@@ -872,7 +867,6 @@ export class Mpeg1Decoder extends Decoder {
       }
     }
   }
-
   private copyValueToDestination(value: number, dest: Uint8ClampedArray, index: number, scan: number): void {
     for (let n = 0; n < 64; n += 8, index += scan + 8) {
       dest[index + 0] = value;

@@ -5,7 +5,7 @@ import { IDecoderProvider } from './i-decoder-provider';
 
 export class Mpeg1DecoderProvider implements IDecoderProvider {
   public canDecode(codecId: CodecId): boolean {
-    return codecId === CodecId.MPEG1;
+    return codecId === CodecId.ID_MPEG1VIDEO || codecId === CodecId.ID_MPEG2VIDEO;
   }
 
   public provide(): IDecoder {

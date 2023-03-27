@@ -1,5 +1,6 @@
 import { OutOfRangeException } from '../exception/out-of-range-exception';
 import { ByteArrayLike } from '../typings';
+import { BlockHelper } from './block-helper';
 
 export class BitReader {
   private _data: Uint8Array;
@@ -28,6 +29,10 @@ export class BitReader {
 
   public set index(idx: number) {
     this._position = idx << 3;
+  }
+
+  public get nextIndex(): number {
+    return (this._position + 7) >> 3;
   }
 
   public get byteLength(): number {
@@ -59,17 +64,13 @@ export class BitReader {
     this._position = position;
   }
 
-  public readToEnd(): Uint8Array {
-    return this._data.subarray(this._position);
-  }
-
   public has(count: number): boolean {
     return this._position + count <= this.length;
   }
 
   public isBlock(block: Array<number>, index?: number): boolean {
     const length = block.length;
-    const idx = index ?? this.index;
+    const idx = index ?? this.nextIndex;
     if (idx + length > this.byteLength) return false;
     let res = true;
     for (let i = 0; i < length; i++) {
@@ -79,6 +80,10 @@ export class BitReader {
       }
     }
     return res;
+  }
+
+  public isNextBytesAreBlock(block: Array<number>): boolean {
+    return this.isBlock(block, this.nextIndex);
   }
 
   public moveToBlock(block: Array<number>): boolean {
@@ -95,11 +100,48 @@ export class BitReader {
   }
 
   public readByteAfterBlock(block: Array<number>): number {
-    let res = 0;
+    let res = -1;
     if (this.moveToBlock(block)) {
-      res = this._data[this.index++];
+      res = this._data[this.index];
+      this.index++;
     }
     return res;
+  }
+
+  public readToEnd(): Uint8Array {
+    return this._data.subarray(this.index);
+  }
+
+  public findStartCode(code: number): number {
+    let current = 0;
+    while (true) {
+      current = this.findNextStartCode();
+      if (current === code || current === -1) break;
+    }
+    return current;
+  }
+
+  public findNextStartCode(): number {
+    const totalBytes = this.byteLength - 3;
+    for (let i = this.nextIndex; i <= totalBytes; i++) {
+      if (this.isStartCode(i)) {
+        this.index = i + 4;
+        return this._data[i + 3];
+      }
+    }
+    this.index = this.byteLength;
+    return -1;
+  }
+
+  public isStartCode(index: number): boolean {
+    return (
+      index >= this.byteLength ||
+      (this._data[index] === 0x00 && this._data[index + 1] === 0x00 && this._data[index + 2] === 0x01)
+    );
+  }
+
+  public isNextBytesAreStartCode(): boolean {
+    return this.isStartCode(this.nextIndex);
   }
 
   private checkPosition(position: number): void {

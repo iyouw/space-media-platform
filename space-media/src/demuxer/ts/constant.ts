@@ -1,3 +1,7 @@
+import { CodecId } from 'src/decoder';
+import { MediaType } from '../media-type';
+import { IStreamTypeLookup } from '../stream/i-stream-lookup';
+
 export const TS_FEC_PACKET_SIZE = 204;
 export const TS_DVHS_PACKET_SIZE = 192;
 export const TS_PACKET_SIZE = 188;
@@ -138,25 +142,73 @@ export const FMC_DESCRIPTOR = 0x1f;
 export const METADATA_DESCRIPTOR = 0x26;
 export const METADATA_STD_DESCRIPTOR = 0x27;
 
-export const VIDEO_TYPES = [
-  STREAM_TYPE_VIDEO_MPEG1,
-  STREAM_TYPE_VIDEO_MPEG2,
-  STREAM_TYPE_VIDEO_H264,
-  STREAM_TYPE_VIDEO_HEVC,
-  STREAM_TYPE_VIDEO_CAVS,
-  STREAM_TYPE_VIDEO_AVS2,
-  STREAM_TYPE_VIDEO_AVS3,
-  STREAM_TYPE_VIDEO_VC1,
-  STREAM_TYPE_VIDEO_DIRAC,
-];
-
-export const AUDIO_TYPES = [
-  STREAM_TYPE_AUDIO_MPEG1,
-  STREAM_TYPE_AUDIO_MPEG2,
-  STREAM_TYPE_AUDIO_AAC,
-  STREAM_TYPE_AUDIO_AAC_LATM,
-  STREAM_TYPE_AUDIO_AC3,
-  STREAM_TYPE_AUDIO_DTS,
-  STREAM_TYPE_AUDIO_TRUEHD,
-  STREAM_TYPE_AUDIO_EAC3,
-];
+export const STREAM_TYPE_LOOPUP: IStreamTypeLookup = {
+  [STREAM_TYPE_VIDEO_MPEG1]: {
+    codecId: CodecId.ID_MPEG1VIDEO,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_MPEG2]: {
+    codecId: CodecId.ID_MPEG2VIDEO,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_H264]: {
+    codecId: CodecId.ID_H264,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_HEVC]: {
+    codecId: CodecId.ID_H265,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_CAVS]: {
+    codecId: CodecId.ID_CAVS,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_AVS2]: {
+    codecId: CodecId.ID_AVS2,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_AVS3]: {
+    codecId: CodecId.ID_AVS3,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_VC1]: {
+    codecId: CodecId.ID_VC1,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_VIDEO_DIRAC]: {
+    codecId: CodecId.ID_DIRAC,
+    mediaType: MediaType.VIDEO,
+  },
+  [STREAM_TYPE_AUDIO_MPEG1]: {
+    codecId: CodecId.ID_MP1,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_MPEG2]: {
+    codecId: CodecId.ID_MP2,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_AAC]: {
+    codecId: CodecId.ID_AAC,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_AAC_LATM]: {
+    codecId: CodecId.ID_AAC_LATM,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_AC3]: {
+    codecId: CodecId.ID_AC3,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_DTS]: {
+    codecId: CodecId.ID_DTS,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_TRUEHD]: {
+    codecId: CodecId.ID_TRUEHD,
+    mediaType: MediaType.AUDIO,
+  },
+  [STREAM_TYPE_AUDIO_EAC3]: {
+    codecId: CodecId.ID_EAC3,
+    mediaType: MediaType.AUDIO,
+  },
+};

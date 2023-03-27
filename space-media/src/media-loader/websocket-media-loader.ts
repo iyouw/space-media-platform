@@ -1,4 +1,4 @@
-import { Handler } from 'src/utils/typings';
+import { Handler } from '../utils/typings';
 import { IMediaLoader } from './i-media-loader';
 
 export class WebsocketMediaLoader implements IMediaLoader {

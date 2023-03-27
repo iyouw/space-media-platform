@@ -1,10 +1,10 @@
-import { IMediaLoader } from 'src/media-loader/i-media-loader';
-import { IMediaLoaderRegistry } from 'src/media-loader/registry/i-media-loader-registry';
-import { MediaLoaderRegistry } from 'src/media-loader/registry/media-loader-registry';
-import { IMediaSource } from 'src/media-source/i-media-source';
-import { MediaSource } from 'src/media-source/media-source';
-import { NotFoundException } from 'src/utils/exception/not-found-exception';
-import { NotImplementException } from 'src/utils/exception/not-implement-exception';
+import { IMediaLoader } from '../../media-loader/i-media-loader';
+import { IMediaLoaderRegistry } from '../../media-loader/registry/i-media-loader-registry';
+import { MediaLoaderRegistry } from '../../media-loader/registry/media-loader-registry';
+import { IMediaSource } from '../../media-source/i-media-source';
+import { MediaSource } from '../../media-source/media-source';
+import { NotFoundException } from '../../utils/exception/not-found-exception';
+import { NotImplementException } from '../../utils/exception/not-implement-exception';
 import { Node } from '../node';
 
 export class MediaSourceNode extends Node {
@@ -24,6 +24,8 @@ export class MediaSourceNode extends Node {
       const node = this.getConnectNode();
       node?.process(this._mediaSource);
     };
+
+    this._mediaLoader.start();
   }
 
   public override process(): void {

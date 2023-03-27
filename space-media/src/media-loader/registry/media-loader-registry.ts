@@ -1,4 +1,4 @@
-import { Registry } from 'src/utils/registry/registry';
+import { Registry } from '../../utils/registry/registry';
 import { IMediaLoaderProvider } from '../provider/i-media-loader-provider';
 import { WebsocketMediaLoaderProvider } from '../provider/websocket-media-loader-provider';
 import { IMediaLoaderRegistry } from './i-media-loader-registry';

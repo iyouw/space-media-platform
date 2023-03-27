@@ -1,4 +1,4 @@
-import { Action } from 'src/utils/typings';
+import { Action } from '../../utils/typings';
 import { Node } from '../node';
 
 export class ActionNode<T = unknown> extends Node<T> {

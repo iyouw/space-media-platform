@@ -2,10 +2,15 @@
   "name": "space-player",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "pnpm build:bundle && pnpm build:types",
+    "build:types": "tsc -p ./tsconfig.json --emitDeclarationOnly",
+    "build:bundle": "node scripts/build.mjs"
   },
+  "files": ["dist"],
   "keywords": [],
   "author": "",
   "license": "ISC",

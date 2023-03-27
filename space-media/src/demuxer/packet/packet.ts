@@ -1,5 +1,5 @@
-import { CodecId } from 'src/decoder/codec-id';
-import { Counter } from 'src/utils/counter/counter';
+import { CodecId } from '../../decoder/codec-id';
+import { Counter } from '../../utils/counter/counter';
 import { MediaType } from '../media-type';
 import { Stream } from '../stream/stream';
 

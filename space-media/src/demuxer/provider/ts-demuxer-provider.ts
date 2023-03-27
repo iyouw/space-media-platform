@@ -1,4 +1,4 @@
-import { IMediaSource } from 'src/media-source/i-media-source';
+import { IMediaSource } from '../../media-source/i-media-source';
 import { IDemuxer } from '../i-demuxer';
 import { TSDemuxer } from '../ts/ts-demuxer';
 import { IDemuxerProvider } from './i-demuxer-provider';

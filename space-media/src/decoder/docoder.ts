@@ -1,5 +1,5 @@
-import { Packet } from 'src/demuxer/packet/packet';
-import { Handler } from 'src/utils/typings';
+import { Packet } from '../demuxer/packet/packet';
+import { Handler } from '../utils/typings';
 import { Frame } from './frame/frame';
 import { IDecoder } from './i-decoder';
 

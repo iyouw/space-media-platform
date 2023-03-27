@@ -1,5 +1,5 @@
-import { IMediaSource } from 'src/media-source/i-media-source';
-import { BitReader } from 'src/utils/reader/bit-reader';
+import { IMediaSource } from '../../media-source/i-media-source';
+import { BitReader } from '../../utils/reader/bit-reader';
 import { Demuxer } from '../demuxer';
 import { MediaType } from '../media-type';
 import { Packet } from '../packet/packet';
@@ -7,7 +7,7 @@ import { PAT } from '../pat/pat';
 import { PMT } from '../pmt/pmt';
 import { Program } from '../program/program';
 import { Stream } from '../stream/stream';
-import { PAT_PID } from './constant';
+import { PAT_PID, STREAM_TYPE_LOOPUP } from './constant';
 
 export class TSDemuxer extends Demuxer {
   private _packetSize: number;
@@ -147,7 +147,7 @@ export class TSDemuxer extends Demuxer {
       reader.skip(3);
       // read elementary_pid(13 bit)
       const pid = reader.read(13);
-      const stream = new Stream(pid, streamType);
+      const stream = new Stream(pid, streamType, STREAM_TYPE_LOOPUP);
       // stream_type 8 bit reserve 3 bit elementary_pid 13bit. total is 8 bit + 3 bit + 13 bit = 3 bytes
       this._pmt.add(stream.id, stream, 3);
 

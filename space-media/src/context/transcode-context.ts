@@ -1,10 +1,10 @@
-import { AudioFrame } from 'src/decoder/frame/audio-frame';
-import { VideoFrame } from 'src/decoder/frame/video-frame';
-import { MediaType } from 'src/demuxer/media-type';
-import { NodeFactory } from 'src/node/factory/node-factory';
-import { INode } from 'src/node/i-node';
-import { INodeFactory } from 'src/node/i-node-factory';
-import { Handler } from 'src/utils/typings';
+import { AudioFrame } from '../decoder/frame/audio-frame';
+import { VideoFrame } from '../decoder/frame/video-frame';
+import { MediaType } from '../demuxer/media-type';
+import { NodeFactory } from '../node/factory/node-factory';
+import { INode } from '../node';
+import { INodeFactory } from '../node/i-node-factory';
+import { Handler } from '../utils/typings';
 
 export class TranscodeContext {
   private _url: string;

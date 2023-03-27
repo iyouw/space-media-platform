@@ -1,4 +1,4 @@
-import { MemoryStream } from 'src/utils/stream/memory-stream';
+import { MemoryStream } from '../utils/stream/memory-stream';
 import { IMediaSource } from './i-media-source';
 
 export class MediaSource extends MemoryStream implements IMediaSource {

@@ -1,9 +1,9 @@
-import { Frame } from 'src/decoder/frame/frame';
-import { IDecoder } from 'src/decoder/i-decoder';
-import { DecoderRegistry } from 'src/decoder/registry/decoder-registry';
-import { IDecoderRegistry } from 'src/decoder/registry/i-decoder-registry';
-import { Packet } from 'src/demuxer/packet/packet';
-import { NotFoundException } from 'src/utils/exception/not-found-exception';
+import { Frame } from '../../decoder/frame/frame';
+import { IDecoder } from '../../decoder/i-decoder';
+import { DecoderRegistry } from '../../decoder/registry/decoder-registry';
+import { IDecoderRegistry } from '../../decoder/registry/i-decoder-registry';
+import { Packet } from '../../demuxer/packet/packet';
+import { NotFoundException } from '../../utils/exception/not-found-exception';
 import { Node } from '../node';
 
 export class MediaDecodeNode extends Node<Packet> {
@@ -18,7 +18,9 @@ export class MediaDecodeNode extends Node<Packet> {
   public process(data: Packet): void {
     if (!this._decoder) {
       const provider = this._decoderRegistry.getProvider(data.codeId);
-      if (!provider) throw new NotFoundException(`decoder for ${data.codeId}`);
+      if (!provider) {
+        throw new NotFoundException(`decoder for ${data.codeId}`);
+      }
       this._decoder = provider.provide();
       this._decoder.onFrameParsed = this.onFrameParsed.bind(this);
     }

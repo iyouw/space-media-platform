@@ -1,4 +1,4 @@
-import { Registry } from 'src/utils/registry/registry';
+import { Registry } from '../../utils/registry/registry';
 import { CodecId } from '../codec-id';
 import { IDecoderProvider } from '../provider/i-decoder-provider';
 import { Mpeg1DecoderProvider } from '../provider/mpeg1-decoder-provider';

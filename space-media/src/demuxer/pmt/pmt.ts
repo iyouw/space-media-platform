@@ -1,4 +1,4 @@
-import { CountableMap } from 'src/utils/map/countable-map';
+import { CountableMap } from '../../utils/map/countable-map';
 import { MediaType } from '../media-type';
 import { Stream } from '../stream/stream';
 

@@ -14,8 +14,8 @@ export * from './provider/ts-demuxer-provider';
 export * from './registry/demuxer-registry';
 export * from './registry/i-demuxer-registry';
 
+export * from './stream/i-stream-lookup';
 export * from './stream/stream';
-export * from './stream/stream-type';
 
 export * from './ts/constant';
 export * from './ts/ts-demuxer';

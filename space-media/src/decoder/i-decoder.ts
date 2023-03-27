@@ -1,4 +1,4 @@
-import { Handler } from 'src/utils/typings';
+import { Handler } from '../utils/typings';
 import { Packet } from '../demuxer/packet/packet';
 import { Frame } from './frame/frame';
 

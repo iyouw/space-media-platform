@@ -1,5 +1,5 @@
-import { IMediaSource } from 'src/media-source/i-media-source';
-import { Handler } from 'src/utils/typings';
+import { IMediaSource } from '../media-source/i-media-source';
+import { Handler } from '../utils/typings';
 import { MediaType } from './media-type';
 import { Packet } from './packet/packet';
 import { Stream } from './stream/stream';

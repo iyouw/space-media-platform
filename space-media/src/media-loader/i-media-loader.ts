@@ -1,4 +1,4 @@
-import { Handler } from 'src/utils/typings';
+import { Handler } from '../utils/typings';
 
 export interface IMediaLoader {
   readonly url: string;

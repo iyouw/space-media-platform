@@ -5,7 +5,10 @@
   "description": "a media player in the deep space to serve visual for all things",
   "scripts": {
     "prepare": "husky install",
-    "lint": "eslint --fix"
+    "startup": "pnpm --filter space-media build && pnpm --filter space-player build",
+    "test:player":"pnpm --filter player-test dev",
+    "lint": "eslint --fix",
+    "clean": "rimraf **/node_modules && rimraf **/dist"
   },
   "author": "iwander",
   "devDependencies": {

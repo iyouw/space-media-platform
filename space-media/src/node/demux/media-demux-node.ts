@@ -1,11 +1,11 @@
-import { IDemuxer } from 'src/demuxer/i-demuxer';
-import { MediaType } from 'src/demuxer/media-type';
-import { Packet } from 'src/demuxer/packet/packet';
-import { ProbeStatus } from 'src/demuxer/provider/probe-status';
-import { DemuxerRegistry } from 'src/demuxer/registry/demuxer-registry';
-import { IDemuxerRegistry } from 'src/demuxer/registry/i-demuxer-registry';
-import { IMediaSource } from 'src/media-source/i-media-source';
-import { NotFoundException } from 'src/utils/exception/not-found-exception';
+import { IDemuxer } from '../../demuxer/i-demuxer';
+import { MediaType } from '../../demuxer/media-type';
+import { Packet } from '../../demuxer/packet/packet';
+import { ProbeStatus } from '../../demuxer/provider/probe-status';
+import { DemuxerRegistry } from '../../demuxer/registry/demuxer-registry';
+import { IDemuxerRegistry } from '../../demuxer/registry/i-demuxer-registry';
+import { IMediaSource } from '../../media-source/i-media-source';
+import { NotFoundException } from '../../utils/exception/not-found-exception';
 import { Node } from '../node';
 
 export class MediaDemuxNode extends Node<IMediaSource> {
