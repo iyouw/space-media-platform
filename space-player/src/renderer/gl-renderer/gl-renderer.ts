@@ -57,23 +57,11 @@ export class GLRenderer implements IRenderer {
     return this._canvas?.height ?? 0;
   }
 
-  public get rootWidth(): number {
-    return this._root?.clientWidth ?? 0;
-  }
-
-  public get rootHeight(): number {
-    return this._root?.clientHeight ?? 0;
-  }
-
   public mount(root: HTMLDivElement): void {
     this._root = root;
     this._canvas = document.createElement('canvas');
     this._canvas.width = root.clientWidth;
     this._canvas.height = root.clientHeight;
-    // this._canvas.style.position = 'absolute';
-    // this._canvas.style.left = '50%';
-    // this._canvas.style.top = '50%';
-    // this._canvas.style.transform = 'translate3d(-50%, -50%, 0)';
     root.appendChild(this._canvas);
     this._gl = this.createContext();
     this.registerEvent();
@@ -118,14 +106,22 @@ export class GLRenderer implements IRenderer {
   public resize(width: number, height: number): void {
     if (!this._canvas || !this._gl || !this._program) return;
 
-    this._gl.useProgram(this._program);
+    // this._gl.useProgram(this._program);
 
-    const codedWidth = ((width + 15) >> 4) << 4;
+    //const codedWidth = ((width + 15) >> 4) << 4;
 
-    const left = (this._canvas.width - width) / 2;
-    const top = (this._canvas.height - height) / 2;
+    const xScale = this.width / width;
+    const yScale = this.height / height;
 
-    this._gl.viewport(left, top, codedWidth, height);
+    const min = Math.min(xScale, yScale);
+
+    const sWidth = width * min;
+    const sHeight = height * min;
+
+    const left = (this._canvas.width - sWidth) / 2;
+    const top = (this._canvas.height - sHeight) / 2;
+
+    this._gl.viewport(left, top, sWidth, sHeight);
   }
 
   public destory(): void {
