@@ -1,5 +1,5 @@
 import { Packet } from '../../demuxer';
-import { BitReader } from '../../utils';
+import { BitReader, Turple2 } from '../../utils';
 import { Decoder } from '../docoder';
 import { AudioFrame } from '../frame/audio-frame';
 
@@ -21,32 +21,50 @@ import {
 } from './constants';
 
 export class Mp2Decoder extends Decoder {
-  private _left: Float32Array = new Float32Array(1152);
-  private _right: Float32Array = new Float32Array(1152);
-  private _sampleRate = 44100;
+  private _left: Float32Array;
 
-  private _d: Float32Array = new Float32Array(1024);
-  private _v: Array<Float32Array> = [new Float32Array(1024), new Float32Array(1024)];
-  private _u: Int32Array = new Int32Array(32);
+  private _right: Float32Array;
 
-  private _vpos = 0;
+  private _d: Float32Array;
 
-  private _allocation: Array<Array<TabItem | undefined>> = [
-    new Array<TabItem | undefined>(32),
-    new Array<TabItem | undefined>(32),
-  ];
-  private _scaleFactorInfo: Array<Uint8Array> = [new Uint8Array(32), new Uint8Array(32)];
-  private _scaleFactor: Array<Array<Array<number | undefined>>> = [
-    new Array<Array<number | undefined>>(32),
-    new Array<Array<number | undefined>>(32),
-  ];
-  private _sample: Array<Array<Array<number>>> = [new Array<Array<number>>(32), new Array<Array<number>>(32)];
+  private _v: Turple2<Float32Array, Float32Array>;
+
+  private _u: Int32Array;
+
+  private _vpos: number;
+
+  private _allocation: Turple2<Array<TabItem | undefined>, Array<TabItem | undefined>>;
+
+  private _scaleFactorInfo: Turple2<Uint8Array, Uint8Array>;
+
+  private _scaleFactor: Turple2<Array<Array<number | undefined>>, Array<Array<number | undefined>>>;
+
+  private _sample: Turple2<Array<Array<number>>, Array<Array<number>>>;
+
+  private _reader?: BitReader;
 
   public constructor() {
     super();
 
+    this._left = new Float32Array(1152);
+    this._right = new Float32Array(1152);
+
+    this._d = new Float32Array(1024);
     this._d.set(SYNTHESIS_WINDOW, 0);
     this._d.set(SYNTHESIS_WINDOW, 512);
+
+    this._v = [new Float32Array(1024), new Float32Array(1024)];
+    this._u = new Int32Array(32);
+
+    this._vpos = 0;
+
+    this._allocation = [new Array<TabItem | undefined>(32), new Array<TabItem | undefined>(32)];
+
+    this._scaleFactorInfo = [new Uint8Array(32), new Uint8Array(32)];
+
+    this._scaleFactor = [new Array<Array<number | undefined>>(32), new Array<Array<number | undefined>>(32)];
+
+    this._sample = [new Array<Array<number>>(32), new Array<Array<number>>(32)];
 
     for (let j = 0; j < 2; j++) {
       for (let i = 0; i < 32; i++) {
@@ -57,39 +75,53 @@ export class Mp2Decoder extends Decoder {
   }
 
   public decode(packet: Packet): void {
-    const reader = new BitReader(packet.data);
-    while (!reader.isEnd) {
-      this.decodeFrame(reader, packet);
+    if (!this._reader) {
+      this._reader = new BitReader(packet.data);
+    } else {
+      this._reader.append(packet.data);
+    }
+    let needMoreData = false;
+    while (this._reader.hasBytes(this._left.length) && !needMoreData) {
+      needMoreData = this.decodeFrame(this._reader, packet);
     }
   }
 
-  private decodeFrame(reader: BitReader, packet: Packet): void {
+  private decodeFrame(reader: BitReader, packet: Packet): boolean {
     const sync = reader.read(11);
     const version = reader.read(2);
     const layer = reader.read(2);
     const hasCRC = !reader.read(1);
 
     if (sync !== FRAME_SYNC || version !== VERSION.MPEG_1 || layer != LAYER.II) {
-      return;
+      return false;
     }
 
     let bitrateIndex = reader.read(4) - 1;
     // invalid bit rate or free format
-    if (bitrateIndex > 13) return;
+    if (bitrateIndex > 13) return false;
 
     let sampleRateIndex = reader.read(2);
-
     // invalid sample rate
-    if (sampleRateIndex === 3) return;
+    if (sampleRateIndex === 3) return false;
+    // version
     if (version === VERSION.MPEG_2) {
       sampleRateIndex += 4;
       bitrateIndex += 14;
     }
+    // padding
     const padding = reader.read(1);
+    // compute the frame size
+    const bitrate = BIT_RATE[bitrateIndex];
+    const sampleRate = SAMPLE_RATE[sampleRateIndex];
+    const frameSize = ((144000 * bitrate) / sampleRate + padding) | 0;
+    //  check if we have enough data
+    if (!reader.hasBytes(frameSize)) return true;
+    // create audio frame
+    const frame = new AudioFrame(packet.pts, 2, sampleRate, frameSize);
     // skip privat (1 bit)
     reader.skip(1);
+    // mode
     const mode = reader.read(2);
-
     // parse the mode_extension, set up the stereo bound
     let bound = 0;
     if (mode === MODE.JOINT_STEREO) {
@@ -98,20 +130,9 @@ export class Mp2Decoder extends Decoder {
       reader.skip(2);
       bound = mode === MODE.MONO ? 0 : 32;
     }
-
     // discard the last 4 bits of the header and the crc value, if present
     reader.skip(4);
     if (hasCRC) reader.skip(16);
-
-    // compute the frame size
-    const bitrate = BIT_RATE[bitrateIndex];
-    const sampleRate = SAMPLE_RATE[sampleRateIndex];
-    const frameSize = ((144000 * bitrate) / sampleRate + padding) | 0;
-    const frame = new AudioFrame(undefined, undefined, packet.pts);
-
-    // frame.bitrate = bitrate;
-    // frame.frameSize = frameSize;
-
     // prepare the quantizer table lookups
     let tab3 = 0;
     let sblimit = 0;
@@ -218,7 +239,7 @@ export class Mp2Decoder extends Decoder {
           for (let ch = 0; ch < 2; ch++) {
             this.matrixTransform(this._sample[ch], p, this._v[ch], this._vpos);
             // build u ,windowing, calculate output
-            Array.prototype.fill(this._u, 0);
+            this._u.fill(0);
 
             let dIndex = 512 - (this._vpos >> 1);
             let vIndex = this._vpos % 128 >> 1;
@@ -254,6 +275,7 @@ export class Mp2Decoder extends Decoder {
     frame.add(this._left);
     frame.add(this._right);
     this.onFrameParsed?.(frame);
+    return false;
   }
 
   private readAllocation(sb: number, tab3: number, reader: BitReader): TabItem | undefined {
@@ -269,36 +291,37 @@ export class Mp2Decoder extends Decoder {
     let val = 0;
 
     if (!q) {
-      // no bits allocated for this subband
+      // No bits allocated for this subband
       sample[0] = sample[1] = sample[2] = 0;
       return;
     }
 
-    // resolve scale factor
+    // Resolve scalefactor
     if (sf === 63) {
       sf = 0;
     } else {
-      const shift = (sf! / 3) | 0;
-      sf = (SCALEFACTOR_BASE[sf! % 3] + ((1 << shift) >> 1)) >> shift;
+      sf ??= 0;
+      const shift = (sf / 3) | 0;
+      sf = (SCALEFACTOR_BASE[sf % 3] + ((1 << shift) >> 1)) >> shift;
     }
 
-    // decode samples
+    // Decode samples
     let adj = q.levels;
     if (q.group) {
-      // decode grouped samples
+      // Decode grouped samples
       val = reader.read(q.bits);
       sample[0] = val % adj;
       val = (val / adj) | 0;
       sample[1] = val % adj;
       sample[2] = (val / adj) | 0;
     } else {
-      // decode direct samples
+      // Decode direct samples
       sample[0] = reader.read(q.bits);
       sample[1] = reader.read(q.bits);
       sample[2] = reader.read(q.bits);
     }
 
-    // post multiply samples
+    // Postmultiply samples
     const scale = (65536 / (adj + 1)) | 0;
     adj = ((adj + 1) >> 1) - 1;
 

@@ -100,7 +100,7 @@ export class Mpeg1Decoder extends Decoder {
 
   public decode(packet: Packet): void {
     const start = self.performance.now();
-    const frame = new VideoFrame(this._width, this._height, packet.pts);
+    const frame = new VideoFrame(packet.pts, this._width, this._height);
     const reader = new BitReader(packet.data);
     if (!this.decodeSequenceLayer(reader, frame)) return;
     if (!this.decodePicture(reader, frame)) return;
@@ -118,7 +118,7 @@ export class Mpeg1Decoder extends Decoder {
     // skip pixel aspect ratio
     reader.skip(4);
     // get frame rate
-    this._frameRate = PICTURE_RATE[reader.read(4)];
+    frame.frameRate = this._frameRate = PICTURE_RATE[reader.read(4)];
     // skip bit_rate, marker, buffer_size and constrained bit
     reader.skip(18 + 1 + 10 + 1);
 

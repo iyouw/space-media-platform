@@ -1,4 +1,5 @@
 import { OutOfRangeException } from '../exception/out-of-range-exception';
+import { MemoryStream } from '../stream/memory-stream';
 import { ByteArrayLike } from '../typings';
 import { BlockHelper } from './block-helper';
 
@@ -144,6 +145,16 @@ export class BitReader {
     return this.isStartCode(this.nextIndex);
   }
 
+  public append(data: ByteArrayLike | Array<ByteArrayLike>): void {
+    const buffer = this.initData(data);
+    const lastLength = this.ensureSize(buffer.length);
+    this._data.set(buffer, lastLength);
+  }
+
+  public hasBytes(length: number): boolean {
+    return this.index + length <= this.byteLength;
+  }
+
   private checkPosition(position: number): void {
     if (position < 0 || position > this.length) throw new OutOfRangeException(0, this.length, position);
   }
@@ -165,10 +176,6 @@ export class BitReader {
     return res;
   }
 
-  private hasBytes(length: number): boolean {
-    return this.index + length <= this.byteLength;
-  }
-
   private initData(data: ByteArrayLike | Array<ByteArrayLike>): Uint8Array {
     const buffers = Array.isArray(data) ? data : [data];
     const length = buffers.reduce((ret, buffer) => (ret += buffer.byteLength), 0);
@@ -180,5 +187,27 @@ export class BitReader {
       pos += buf.length;
     });
     return res;
+  }
+
+  private ensureSize(size: number): number {
+    if (this.index > size) {
+      return this.recycle();
+    } else {
+      return this.expande(size);
+    }
+  }
+
+  private recycle(): number {
+    const index = this.byteLength - this.index;
+    this._data.copyWithin(0, this.position, this.length);
+    return index;
+  }
+
+  private expande(size: number): number {
+    const length = this.byteLength;
+    const buf = new Uint8Array(length + size);
+    buf.set(this._data);
+    this._data = buf;
+    return length;
   }
 }

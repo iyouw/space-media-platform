@@ -12,5 +12,8 @@ export type Predicate<T> = Func<T, boolean>;
 export type Equal<T> = Func2<T, T, boolean>;
 export type Compare<T> = Func2<T, T, number>;
 
+export type Turple<T> = [T];
+export type Turple2<T1, T2> = [T1, T2];
+
 export type ByteArray = Uint8Array | Uint8ClampedArray;
 export type ByteArrayLike = ByteArray | ArrayBuffer;
