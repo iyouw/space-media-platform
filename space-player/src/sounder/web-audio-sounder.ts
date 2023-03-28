@@ -1,14 +1,12 @@
 import { ISounder } from './i-sounder';
 
 export class WebAudioSounder implements ISounder {
-  private static CachedContext: AudioContext | undefined = undefined;
-
   public static NeedsUnlocking(): boolean {
     return /iPhone|iPad|iPod/i.test(navigator.userAgent);
   }
 
   public static IsSupported(): boolean {
-    return !!window.AudioContext;
+    return !!AudioContext;
   }
 
   private _context: AudioContext;
@@ -18,7 +16,6 @@ export class WebAudioSounder implements ISounder {
   private _destination: GainNode;
 
   private _startTime: number;
-  private _buffer: Float32Array | null;
   private _wallclockStartTime: number;
   private _volume: number;
   private _enabled: boolean;
@@ -26,15 +23,14 @@ export class WebAudioSounder implements ISounder {
   private _unlocked: boolean;
 
   public constructor() {
-    this._context = new window.AudioContext();
+    this._context = new AudioContext();
     this._gain = this._context.createGain();
     this._destination = this._gain;
     // keep track ofthe number of connections to this audio context, so we
     // can safely close() it when we are the only one connected to it.
-    this._gain.connect(this._destination);
+    this._gain.connect(this._context.destination);
 
     this._startTime = 0;
-    this._buffer = null;
     this._wallclockStartTime = 0;
     this._volume = 1;
     this._enabled = true;
@@ -45,7 +41,6 @@ export class WebAudioSounder implements ISounder {
   public dispose(): void {
     this._gain.disconnect();
     this._context.close();
-    WebAudioSounder.CachedContext = undefined;
   }
 
   public sound(left: Float32Array, right: Float32Array, sampleRate: number): void {

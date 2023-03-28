@@ -5,6 +5,7 @@
     "declaration": true,
     "outDir": "./dist",
     "sourceMap": true,
+    "lib": ["DOM","ESNEXT"]
   },
   "include": [
     "src/**/*"
