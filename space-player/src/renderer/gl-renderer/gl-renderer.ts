@@ -104,7 +104,7 @@ export class GLRenderer implements IRenderer {
   }
 
   public resize(width: number, height: number): void {
-    if (!this._canvas || !this._gl || !this._program) return;
+    if (!this._gl) return;
 
     // this._gl.useProgram(this._program);
 
@@ -118,8 +118,8 @@ export class GLRenderer implements IRenderer {
     const sWidth = width * min;
     const sHeight = height * min;
 
-    const left = (this._canvas.width - sWidth) / 2;
-    const top = (this._canvas.height - sHeight) / 2;
+    const left = (this.width - sWidth) / 2;
+    const top = (this.height - sHeight) / 2;
 
     this._gl.viewport(left, top, sWidth, sHeight);
   }
