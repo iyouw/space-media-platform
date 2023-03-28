@@ -1,7 +1,5 @@
 import { OutOfRangeException } from '../exception/out-of-range-exception';
-import { MemoryStream } from '../stream/memory-stream';
 import { ByteArrayLike } from '../typings';
-import { BlockHelper } from './block-helper';
 
 export class BitReader {
   private _data: Uint8Array;
