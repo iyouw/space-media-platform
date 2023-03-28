@@ -84,7 +84,7 @@ export class BitReader {
   }
 
   public isNextBytesAreBlock(block: Array<number>): boolean {
-    return this.isBlock(block, this.nextIndex);
+    return this.isBlock(block);
   }
 
   public moveToBlock(block: Array<number>): boolean {
@@ -100,8 +100,8 @@ export class BitReader {
     return res;
   }
 
-  public readByteAfterBlock(block: Array<number>): number {
-    let res = -1;
+  public readByteAfterBlock(block: Array<number>): number | undefined {
+    let res: number | undefined = undefined;
     if (this.moveToBlock(block)) {
       res = this._data[this.index];
       this.index++;
