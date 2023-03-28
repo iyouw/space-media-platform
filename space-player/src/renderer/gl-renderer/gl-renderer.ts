@@ -32,11 +32,10 @@ export class GLRenderer implements IRenderer {
   private _enabled: boolean;
   private _hasTextureData: Record<number, boolean>;
 
-  private _width: number;
-  private _height: number;
-
   private _gl?: WebGLRenderingContext;
   private _shouldCreateUnclampedViews: boolean;
+
+  private _root?: HTMLDivElement;
 
   public handleContextLostBound: EventListener;
   public handleContextRestoredBound: EventListener;
@@ -44,17 +43,37 @@ export class GLRenderer implements IRenderer {
   public constructor() {
     this._hasTextureData = {};
     this._shouldCreateUnclampedViews = false;
-    this._width = 0;
-    this._height = 0;
+
     this.handleContextLostBound = this.handleContextLost.bind(this);
     this.handleContextRestoredBound = this.handleContextRestore.bind(this);
     this._enabled = false;
   }
 
+  public get width(): number {
+    return this._canvas?.width ?? 0;
+  }
+
+  public get height(): number {
+    return this._canvas?.height ?? 0;
+  }
+
+  public get rootWidth(): number {
+    return this._root?.clientWidth ?? 0;
+  }
+
+  public get rootHeight(): number {
+    return this._root?.clientHeight ?? 0;
+  }
+
   public mount(root: HTMLDivElement): void {
+    this._root = root;
     this._canvas = document.createElement('canvas');
-    this._canvas.width = this._width = root.clientWidth;
-    this._canvas.height = this._height = root.clientHeight;
+    this._canvas.width = root.clientWidth;
+    this._canvas.height = root.clientHeight;
+    this._canvas.style.position = 'absolute';
+    this._canvas.style.left = '50%';
+    this._canvas.style.top = '50%';
+    this._canvas.style.transform = 'translate3d(-50%, -50%, 0)';
     root.appendChild(this._canvas);
     this._gl = this.createContext();
     this.registerEvent();
@@ -71,12 +90,12 @@ export class GLRenderer implements IRenderer {
   ): void {
     if (!this._enabled) return;
 
-    if (this._width !== width || this._height != height) this.resize(width, height);
+    if (this.width !== width || this.height != height) this.resize(width, height);
 
     const gl = this._gl!;
 
-    const w = ((this._width + 15) >> 4) << 4;
-    const h = this._height;
+    const w = ((this.width + 15) >> 4) << 4;
+    const h = this.height;
     const w2 = w >> 1;
     const h2 = h >> 1;
 
@@ -96,19 +115,22 @@ export class GLRenderer implements IRenderer {
   }
 
   public resize(width: number, height: number): void {
-    this._width = width | 0;
-    this._height = height | 0;
+    if (!this._canvas || !this._gl || !this._program) return;
 
-    this._canvas!.width = this._width;
-    this._canvas!.height = this._height;
+    this._canvas.width = width;
+    this._canvas.height = height;
 
-    this._gl!.useProgram(this._program!);
-    const codedWidth = ((this._width + 15) >> 4) << 4;
-    this._gl!.viewport(0, 0, codedWidth, this._height);
+    this._gl.useProgram(this._program);
+    const codedWidth = ((this.width + 15) >> 4) << 4;
+    this._gl.viewport(0, 0, codedWidth, this.height);
+
+    this.layout();
   }
 
   public destory(): void {
-    const gl = this._gl!;
+    if (!this._gl || !this._program || !this._loadingProgram) return;
+
+    const gl = this._gl;
 
     // remove texture
     this.deleteTexture(gl.TEXTURE0, this._textureY!);
@@ -117,8 +139,8 @@ export class GLRenderer implements IRenderer {
 
     // remove program
     gl.useProgram(null);
-    gl.deleteProgram(this._program!);
-    gl.deleteProgram(this._loadingProgram!);
+    gl.deleteProgram(this._program);
+    gl.deleteProgram(this._loadingProgram);
 
     // remove buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -273,5 +295,13 @@ export class GLRenderer implements IRenderer {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 1, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8ClampedArray([0]));
 
     return gl.getError() === 0;
+  }
+
+  private layout(): void {
+    if (!this._canvas) return;
+    const xScale = this.rootWidth / this.width;
+    const yScale = this.rootHeight / this.height;
+    const min = Math.min(xScale, yScale);
+    this._canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${min})`;
   }
 }

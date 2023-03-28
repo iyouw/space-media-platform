@@ -23,6 +23,7 @@ onMounted(() => {
 
 <style scoped>
 .player {
+  position: absolute;
   width: 800px;
   height: 600px;
   background-color: lavenderblush;
