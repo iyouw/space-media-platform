@@ -33,6 +33,7 @@ export abstract class Demuxer implements IDemuxer {
   }
 
   public dispose(): void {
-    void 0;
+    this.onHeaderParsed = undefined;
+    this.onPacketParsed = undefined;
   }
 }

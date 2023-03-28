@@ -99,13 +99,10 @@ export class Mpeg1Decoder extends Decoder {
   private _dcPredictorCb = 0;
 
   public decode(packet: Packet): void {
-    const start = self.performance.now();
     const frame = new VideoFrame(packet.pts, this._width, this._height);
     const reader = new BitReader(packet.data);
     if (!this.decodeSequenceLayer(reader, frame)) return;
     if (!this.decodePicture(reader, frame)) return;
-    const duration = self.performance.now() - start;
-    console.log(Mpeg1Decoder.name, `time elapsed:${duration}`);
   }
 
   // sequence layer

@@ -16,9 +16,7 @@ export abstract class Node<T = unknown> implements INode<T> {
     this._map.set(channel, node);
   }
 
-  public dispose(): void {
-    void 0;
-  }
+  public dispose(): void {}
 
   protected getConnectNode(channel?: unknown): INode | undefined {
     channel ??= Node.DefaultChannel;

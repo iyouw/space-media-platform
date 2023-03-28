@@ -1,4 +1,4 @@
-import { CodecId } from 'src/decoder';
+import { CodecId } from '../../decoder';
 import { MediaType } from '../media-type';
 import { IStreamTypeLookup } from '../stream/i-stream-lookup';
 

@@ -1,8 +1,8 @@
 import { AudioFrame, TranscodeContext, VideoFrame } from 'space-media';
-import { GLRenderer } from 'src/renderer/gl-renderer/gl-renderer';
-import { IRenderer } from 'src/renderer/i-renderer';
-import { WebAudioSounder } from 'src/sounder';
-import { ISounder } from 'src/sounder/i-sounder';
+import { GLRenderer } from '../renderer/gl-renderer/gl-renderer';
+import { IRenderer } from '../renderer/i-renderer';
+import { WebAudioSounder } from '../sounder';
+import { ISounder } from '../sounder/i-sounder';
 import { IPlayer } from './i-player';
 
 export class SpacePlayer implements IPlayer {

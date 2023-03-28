@@ -32,7 +32,7 @@ export class MediaDemuxNode extends Node<IMediaSource> {
     this._demuxer?.demux(data);
   }
 
-  public dispose(): void {
+  public override dispose(): void {
     this._demuxer?.dispose();
     this._demuxer = undefined;
   }

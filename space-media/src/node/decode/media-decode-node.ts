@@ -27,7 +27,7 @@ export class MediaDecodeNode extends Node<Packet> {
     this._decoder.decode(data);
   }
 
-  public dispose(): void {
+  public override dispose(): void {
     this._decoder?.dispose();
     this._decoder = undefined;
   }

@@ -32,7 +32,7 @@ export class MediaSourceNode extends Node {
     throw new NotImplementException();
   }
 
-  public dispose(): void {
+  public override dispose(): void {
     this._mediaLoader?.stop();
     this._mediaSource?.dispose();
     this._mediaLoader = undefined;

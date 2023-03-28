@@ -47,6 +47,12 @@ export class TSDemuxer extends Demuxer {
     }
   }
 
+  public override dispose(): void {
+    super.dispose();
+    this._pat = undefined;
+    this._pmt = undefined;
+  }
+
   protected parsePacket(reader: BitReader): void {
     // check start code;
     if (reader.read(8) !== 0x47) return;

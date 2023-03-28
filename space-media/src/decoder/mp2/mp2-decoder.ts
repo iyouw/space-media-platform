@@ -92,7 +92,7 @@ export class Mp2Decoder extends Decoder {
     const layer = reader.read(2);
     const hasCRC = !reader.read(1);
 
-    if (sync !== FRAME_SYNC || version !== VERSION.MPEG_1 || layer != LAYER.II) {
+    if (sync !== FRAME_SYNC || version !== VERSION.MPEG_1 || layer !== LAYER.II) {
       return false;
     }
 
