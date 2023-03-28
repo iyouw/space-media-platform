@@ -70,10 +70,10 @@ export class GLRenderer implements IRenderer {
     this._canvas = document.createElement('canvas');
     this._canvas.width = root.clientWidth;
     this._canvas.height = root.clientHeight;
-    this._canvas.style.position = 'absolute';
-    this._canvas.style.left = '50%';
-    this._canvas.style.top = '50%';
-    this._canvas.style.transform = 'translate3d(-50%, -50%, 0)';
+    // this._canvas.style.position = 'absolute';
+    // this._canvas.style.left = '50%';
+    // this._canvas.style.top = '50%';
+    // this._canvas.style.transform = 'translate3d(-50%, -50%, 0)';
     root.appendChild(this._canvas);
     this._gl = this.createContext();
     this.registerEvent();
@@ -89,13 +89,14 @@ export class GLRenderer implements IRenderer {
     height: number
   ): void {
     if (!this._enabled) return;
+    if (!this._gl || !this._program) return;
 
     if (this.width !== width || this.height != height) this.resize(width, height);
 
-    const gl = this._gl!;
+    const gl = this._gl;
 
-    const w = ((this.width + 15) >> 4) << 4;
-    const h = this.height;
+    const w = ((width + 15) >> 4) << 4;
+    const h = height;
     const w2 = w >> 1;
     const h2 = h >> 1;
 
@@ -105,7 +106,7 @@ export class GLRenderer implements IRenderer {
       cr = new Uint8Array(cr.buffer);
     }
 
-    gl.useProgram(this._program!);
+    gl.useProgram(this._program);
 
     this.updateTexture(gl.TEXTURE0, this._textureY!, w, h, y);
     this.updateTexture(gl.TEXTURE1, this._textureCb!, w2, h2, cb);
@@ -117,14 +118,14 @@ export class GLRenderer implements IRenderer {
   public resize(width: number, height: number): void {
     if (!this._canvas || !this._gl || !this._program) return;
 
-    this._canvas.width = width;
-    this._canvas.height = height;
-
     this._gl.useProgram(this._program);
-    const codedWidth = ((this.width + 15) >> 4) << 4;
-    this._gl.viewport(0, 0, codedWidth, this.height);
 
-    this.layout();
+    const codedWidth = ((width + 15) >> 4) << 4;
+
+    const left = (this._canvas.width - width) / 2;
+    const top = (this._canvas.height - height) / 2;
+
+    this._gl.viewport(left, top, codedWidth, height);
   }
 
   public destory(): void {
@@ -295,13 +296,5 @@ export class GLRenderer implements IRenderer {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 1, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8ClampedArray([0]));
 
     return gl.getError() === 0;
-  }
-
-  private layout(): void {
-    if (!this._canvas) return;
-    const xScale = this.rootWidth / this.width;
-    const yScale = this.rootHeight / this.height;
-    const min = Math.min(xScale, yScale);
-    this._canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${min})`;
   }
 }
