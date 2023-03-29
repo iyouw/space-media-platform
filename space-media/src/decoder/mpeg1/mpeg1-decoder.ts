@@ -102,7 +102,7 @@ export class Mpeg1Decoder extends Decoder {
     const frame = new VideoFrame(packet.pts, this._width, this._height);
     const reader = new BitReader(packet.data);
     if (!this.decodeSequenceLayer(reader, frame)) return;
-    if (!this.decodePicture(reader, frame)) return;
+    this.decodePicture(reader, frame);
   }
 
   // sequence layer
