@@ -35,7 +35,8 @@ export class GLRenderer implements IRenderer {
   private _gl?: WebGLRenderingContext;
   private _shouldCreateUnclampedViews: boolean;
 
-  private _root?: HTMLDivElement;
+  private _textureWidth: number;
+  private _textureHeight: number;
 
   public handleContextLostBound: EventListener;
   public handleContextRestoredBound: EventListener;
@@ -43,6 +44,9 @@ export class GLRenderer implements IRenderer {
   public constructor() {
     this._hasTextureData = {};
     this._shouldCreateUnclampedViews = false;
+
+    this._textureWidth = 0;
+    this._textureHeight = 0;
 
     this.handleContextLostBound = this.handleContextLost.bind(this);
     this.handleContextRestoredBound = this.handleContextRestore.bind(this);
@@ -58,7 +62,6 @@ export class GLRenderer implements IRenderer {
   }
 
   public mount(root: HTMLDivElement): void {
-    this._root = root;
     this._canvas = document.createElement('canvas');
     this._canvas.width = root.clientWidth;
     this._canvas.height = root.clientHeight;
@@ -79,7 +82,7 @@ export class GLRenderer implements IRenderer {
     if (!this._enabled) return;
     if (!this._gl || !this._program) return;
 
-    if (this.width !== width || this.height != height) this.resize(width, height);
+    if (this._textureWidth !== width || this._textureHeight != height) this.resize(width, height);
 
     const gl = this._gl;
 
@@ -109,6 +112,8 @@ export class GLRenderer implements IRenderer {
     // this._gl.useProgram(this._program);
 
     //const codedWidth = ((width + 15) >> 4) << 4;
+    this._textureWidth = width;
+    this._textureHeight = height;
 
     const xScale = this.width / width;
     const yScale = this.height / height;
